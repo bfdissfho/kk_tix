@@ -1,0 +1,108 @@
+// ==UserScript==
+// @name         kktix normal
+// @namespace    http://tampermonkey.net/
+// @version      2024-09-04
+// @description  try to take over the world!
+// @author       You
+// @match        https://kktix.com/events/*/registrations/new
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=kktix.com
+// @grant        none
+// ==/UserScript==
+
+(function() {
+
+    function selectInputBasedOnPercentage() {
+        // Define the input elements
+        const inputs = document.querySelectorAll('input[ng-model="ticketModel.quantity"]');
+
+        // Define the weights
+        const weights = [0.2, 0.5, 0.3]; // Input 1: 20%, Input 2: 50%, Input 3: 30%
+
+        // Generate a random number between 0 and 1
+        const random = Math.random();
+
+        // Determine which input to select based on the weights
+        let cumulativeWeight = 0;
+        let selectedInput = null;
+
+        for (let i = 0; i < weights.length; i++) {
+            cumulativeWeight += weights[i];
+            if (random < cumulativeWeight) {
+                selectedInput = inputs[i];
+                break;
+            }
+        }
+
+        // Check if the selected input exists and is not disabled
+        if (selectedInput) {
+            // Set a value (for example, 4)
+            selectedInput.value = '4';
+
+            // Dispatch input and change events to notify Angular
+            const event = new Event('input', { bubbles: true });
+            selectedInput.dispatchEvent(event);
+            clickAgreeTermsCheckbox()
+            console.log(`Input value set to: 4 in the selected input.`);
+        } else {
+            console.log('No valid input selected or input is disabled.');
+        }
+    }
+
+
+
+
+
+    function clickAgreeTermsCheckbox() {
+        // Select the checkbox input element
+        const checkbox = document.querySelector('input[id="person_agree_terms"]');
+
+        // Check if the checkbox exists and is not disabled
+        if (checkbox && !checkbox.disabled) {
+            // Simulate a click event
+            checkbox.click();
+
+            // Dispatch change event to notify Angular
+            const event = new Event('change', { bubbles: true });
+            checkbox.dispatchEvent(event);
+
+
+            setTimeout(clickNextStepButton, 200);
+
+
+            console.log('Checkbox "I agree to the terms" clicked.');
+        } else {
+            console.log('Checkbox not found or is disabled.');
+        }
+    }
+
+    function clickNextStepButton() {
+        // Select the button element
+        const button = document.querySelector('button.btn-primary.btn-lg');
+
+        // Check if the button exists and is not disabled
+        if (button && !button.disabled) {
+            // Simulate a click event
+            button.click();
+            console.log('Next step button clicked.');
+        } else {
+            console.log('Button not found or is disabled.');
+        }
+    }
+
+
+
+    function startPolling() {
+        const interval_quan = setInterval(() => {
+            const inputs = document.querySelectorAll('input[ng-model="ticketModel.quantity"]');
+            if (inputs.length > 0) {
+                clearInterval(interval_quan); // Stop checking once found
+                selectInputBasedOnPercentage(); // Call the function
+            } else {
+                console.log('Waiting for the input elements...');
+            }
+        }, 300); // Check every 300ms
+    }
+
+startPolling()
+
+})();
